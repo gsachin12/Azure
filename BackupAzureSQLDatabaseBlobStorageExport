@@ -1,0 +1,47 @@
+ #use the Azure Account Automation details to login
+ $Conn = Get-AutomationConnection -Name AzureRunAsConnection
+ Connect-AzAccount -ServicePrincipal -Tenant $Conn.TenantID -ApplicationId $Conn.ApplicationID -CertificateThumbprint $Conn.CertificateThumbprint
+    
+ $subscriptionId = "d5bbb0a8-acac-430d-b8e3-c3fb73e1e331"
+ $serverAdmin = "sachin"
+ $serverPassword = "Sg9930728486#"
+ $securePassword = ConvertTo-SecureString $serverPassword -AsPlainText -Force
+ $creds = New-Object System.Management.Automation.PSCredential($serverAdmin, $securePassword)
+ $DatabaseName ="blobstoragebackup"
+ $ResourceGroupName="AzureSQLDatabaseRG"
+ $ServerName="azuresqldatabasesachin"
+    
+ # Generate a unique filename for the BACPAC
+ $bacpacFilename = $DatabaseName + (Get-Date).ToString("yyyyMMddHHmm") + ".bacpac"
+    
+ # Storage account info for the BACPAC
+ $BaseStorageUri = "https://sophosfirewallsachin.blob.core.windows.net/abc/"
+ $BacpacUri = $BaseStorageUri + $bacpacFilename
+ $StorageKeytype = "StorageAccessKey"
+ $StorageKey = "uxD1YKVvlSVINqsq46GGsZQC3VS1uf83FI4xvvc70JUQi9X24QJ4qPfHFmcoygUDgBjgEE5wVjGJUC+ffQbFNg=="
+    
+ #create the bacpac file and land in the blob storage
+ New-AzSqlDatabaseExport -ResourceGroupName $ResourceGroupName -ServerName $ServerName `
+    -DatabaseName $DatabaseName -StorageKeytype $StorageKeytype -StorageKey $StorageKey -StorageUri $BacpacUri `
+    -AdministratorLogin $creds.UserName -AdministratorLoginPassword $creds.Password
+     
+  #delete bacpac file older than 30 days
+  $DaysOld = 30
+  $StorageAcctNme = "sophosfirewallsachin"
+  $containerName = "abc"
+  $StorageAccountContext = New-AzureStorageContext -storageAccountName $StorageAcctNme -StorageAccountKey $StorageKey
+  $blobs = Get-AzureStorageBlob -Container $containerName -Context $StorageAccountContext
+  #cycle through each file by ModifiedDate and delete where gt 30 days from now
+  foreach ($blob in $blobs)
+     {
+         $lastModified = $blob.LastModified
+         if ($lastModified -ne $null)
+         {
+             $blobDays = ([DateTime]::Now - $lastModified.DateTime)  #[DateTime]
+    
+             if ($blobDays.Days -ge $DaysOld)
+             {
+                 Remove-AzureStorageBlob -Blob $blob.Name -Container $containerName -Context $StorageAccountContext;
+             }
+         }
+     }
