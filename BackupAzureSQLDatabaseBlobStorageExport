@@ -1,4 +1,14 @@
- #use the Azure Account Automation details to login
+
+ #we have to create Automation Account ->Account Settings-> RunAsAccounts
+ 
+#We should be able to set it up like this:
+#1. Create a file storage area in Azure – cold storage should be applicable as it is not used regularly and is cheaper.
+#2. Create a Powershell script to Backup the database to a .bacpac file and send it to the file storage area with an appropriate naming convention that clearly shows the date of the back up.
+#3. Create an Azure automation task to schedule the powershell backup for an appropriate window out of business hours.
+$4. In that script delete backup files older than n days – could be 30 but once you have it set up you can say what you want.
+$5. The restore process is not very elegant as you can't do an overwrite - looks like delete the database using the Azure portal and Import from the bacpac.
+#use the Azure Account Automation details to login
+
  $Conn = Get-AutomationConnection -Name AzureRunAsConnection
  Connect-AzAccount -ServicePrincipal -Tenant $Conn.TenantID -ApplicationId $Conn.ApplicationID -CertificateThumbprint $Conn.CertificateThumbprint
     
