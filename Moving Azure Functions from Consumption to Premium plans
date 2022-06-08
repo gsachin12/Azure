@@ -1,4 +1,4 @@
-#Moving Azure Functions from Consumption to Premium plans
+#Moving Azure Functions from Consumption to Premium plans#
 
 
 This is a quick post on how we can change the Plan Type of an Azure Function App from Consumption (Serverless) to a Premium Plan. 
