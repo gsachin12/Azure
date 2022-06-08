@@ -1,12 +1,11 @@
-Moving Azure Functions from Consumption to Premium plans
+#Moving Azure Functions from Consumption to Premium plans
 
 
 This is a quick post on how we can change the Plan Type of an Azure Function App from Consumption (Serverless) to a Premium Plan. 
 If you have created an Azure Function App initially selecting Consumption (Serverless) as the plan type and 
 then later if you want to change it to a Premium Plan, Azure Portal has no direct way to do it.
 
-
-Here you have 2 options,
+#Here you have 2 options,
 
 1.Create a new Azure Function App with a Premium plan and redeploy code
 2.Create a new Azure Function Premium Plan and change the existing Function App to use the new plan through Azure CLI
@@ -30,4 +29,24 @@ az functionapp plan create --name $premiumPlanName --sku EP1 --resource-group $r
 In the step 2, we move our Function app to the Premium plan with the following 
 command:
 az functionapp update --name $functionAppName --resource-group $resourceGroup --plan $premiumPlanName
+
+
+
+###############################################################################################################################################
+
+#Moving Azure Functions from Premium to Consumption plans
+
+Remove all the Premium plan Feature in Azure function then we can moving Azure function premium to consumption
+
+Command:
+
+az functionapp update --name “<name of your Azure function>” --resource-group “<your resource group name” --force --plan “<name of your consumption plan name>”
+
+###################################################################################################################################################
+
+#Azure Functions-How to Migrate from Consumption Plan to App Service Plan
+
+Command:
+
+Set-AzAppServicePlan -ResourceGroupName “<your resource group name” -Name “<name of your consumption plan>” -PerSiteScaling $true -tier S1
 
